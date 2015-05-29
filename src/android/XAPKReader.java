@@ -8,6 +8,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.net.Uri;
 
 public class XAPKReader extends CordovaPlugin {
@@ -26,8 +27,7 @@ public class XAPKReader extends CordovaPlugin {
    {"xapk_text_preparing_assets"  , "string"},
    {"xapk_text_download_failed"   , "string"},
    {"xapk_text_error"             , "string"},
-   {"xapk_text_close"             , "string"},
-   {"xapk_google_play_public_key" , "string"}
+   {"xapk_text_close"             , "string"}
   };
   int curlen = xmlData.length;
   for (int i = 0; i < curlen; i++) {
@@ -54,11 +54,18 @@ public class XAPKReader extends CordovaPlugin {
   
   cordova.getActivity().runOnUiThread (new Runnable() {
    @Override public void run () {
-    XAPKDownloaderActivity.cordovaActivity = cordova.getActivity(); // Workaround for Cordova/Crosswalk flickering status bar bug.
-    Context context = cordova.getActivity().getApplicationContext();
-    Intent intent = new Intent(context, XAPKDownloaderActivity.class);
-    intent.putExtras (bundle);
-    cordova.getActivity().startActivity (intent);
+    int splashscreenTime = preferences.getInteger("SplashScreenDelay", 3000);
+
+    final Handler handler = new Handler();
+    handler.postDelayed(new Runnable() {
+     public void run() {
+      XAPKDownloaderActivity.cordovaActivity = cordova.getActivity(); // Workaround for Cordova/Crosswalk flickering status bar bug.
+      Context context = cordova.getActivity().getApplicationContext();
+      Intent intent = new Intent(context, XAPKDownloaderActivity.class);
+      intent.putExtras (bundle);
+      cordova.getActivity().startActivity (intent);
+     }
+    }, splashscreenTime);
    }
   });
   
